@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<!-- saved from url=(0052)http://192.168.120.219/jsp/myXfinity/myApp/myApp.jsp -->
+<html>
+<head>
+<title>我的应用</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="keywords" content="xfinity">
+<meta name="description" content="xfinity hpc cloud">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+<link rel="SHORTCUT ICON" type="image/ico" href="favicon.ico">
+<link rel="icon" type="image/png" href="favicon.ico">
+<link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="lib/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="lib/font-awesome/css/font-awesome-ie7.min.css" rel="stylesheet" type="text/css">
+
+<script type="text/javascript" src="lib/jquery/jquery-1.11.1.min.js"></script>
+<script type="text/javascript" src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="lib/jquery.bootstrap.min.js"></script>
+<script type="text/javascript" src="js/message.js"></script>
+<script type="text/javascript" src="js/constant.js"></script>
+<script type="text/javascript" src="js/myCookieUtil.js"></script>
+<script type="text/javascript" src="js/UserUtil.js"></script>
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!--[if lt IE 9]>
+   <script src="lib/ie-support/html5shiv.min.js"></script>
+   <script src="lib/ie-support/respond.min.js"></script>
+<![endif]-->
+
+<!-- font -->
+<style type="text/css">
+img,body,html {
+	FONT-FAMILY: "Microsoft Yahei", Arial, Helvetica, sans-serif
+}
+</style>
+
+<!-- for modal dialog, we can move the page when dialog is show. -->
+<style type="text/css">
+.modal-open {
+	overflow: auto;
+}
+</style>
+
+<script type="text/javascript">
+	// support ie8 add string trim function
+	if (!String.prototype.trim) {
+		String.prototype.trim = function() {
+			return this.replace(/(^\s*)|(\s*$)/g, "");
+		}
+		String.prototype.ltrim = function() {
+			return this.replace(/(^\s*)/g, "");
+		}
+		String.prototype.rtrim = function() {
+			return this.replace(/(\s*$)/g, "");
+		}
+	}
+	// end support ie8
+</script>
+
+	<link rel="stylesheet" href="css/hr.css" type="text/css">
+	<link href="css/loadingBtn.css" rel="stylesheet">
+</head>
+<body>
+<script type="text/javascript">		
+	var currentUserName =  'jieliu';
+	var currentUserCode =  '4028f85b5003804c01500381cf8f0001';
+	var groupCode =  '4028f85b5003804c01500381cf190000';
+	var groupName =  '上海超级计算中心';
+	var groupType =  '0';
+	var groupUserType = '0';
+	var roleCode = 'group-admin';
+	var language = "zh_CN";
+</script>
+
+<div class="navbar navbar-default navbar-static-top">
+	<div class="container">
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-ex-collapse">
+				<span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span>
+			</button>
+			
+			<a href="javascript:void(0);"><img alt="Xfinity HPC Cloud" src="images/logo.png" height="50px" style="padding:5px"></a>
+		</div>
+		
+		<div class="collapse navbar-collapse" id="navbar-ex-collapse">
+			<ul id="_head" class="nav navbar-nav navbar-left">
+				<li id="_homePage"><a href="javascript:void(0);">&nbsp;&nbsp;&nbsp;&nbsp;首页&nbsp;&nbsp;&nbsp;&nbsp;<br>
+				</a></li>
+				<li id="_myXfinity"><a href="javascript:void(0);">我的Xfinity</a></li>
+				<li id="_appCenter"><a href="javascript:void(0);">应用中心</a></li>
+				<li id="_resCenter" class="hidden"><a href="javascript:void(0);">资源中心</a></li>
+			</ul>
+			<ul class="nav navbar-nav navbar-right">
+				<li id="userLink" class=""><a id="userNameA" href="javascript:void(0);">jieliu</a></li>
+				<li id="logoutLink" class=""><a href="javascript:void(0);">退出<br>
+				</a></li>
+				<li id="loginLink" class="hidden"><a href="javascript:void(0);">登录<br>
+				</a></li>
+				<li id="registryLink" class="hidden"><a href="javascript:void(0);">注册<br>
+				</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+	<div class="section">
+		<div class="container">
+			<ul class="breadcrumb">
+				<li>
+					<a href="javascript:void(0);">我的Xfinity</a>
+				</li>
+				<li class="active">
+					我的应用
+				</li>
+			</ul>
+			<div class="row">
+				<div class="col-md-12">
+					<div class="col-md-3">
+						<div>
+							<strong>常用标签</strong>
+							<a href="javascript:void(0);" class="btn" data-name="collapse-btn" for="para">
+								<i class="fa fa-fw fa-lg t-plus fa-angle-double-up"></i>
+							</a>
+							<a href="javascript:void(0);" class="btn" data-name="expand-btn" for="para" style="display:none;">
+								<i class="fa fa-fw fa-lg t-plus fa-angle-double-down"></i>
+							</a>
+							<a id="delete-shortcuts" href="javascript:void(0);" class="btn pull-right" style="display:none;">删除</a>
+						</div>
+						<div id="shortcut" class="well"><div id="qmk-gen101" style="padding: 5px 0;" data-shortcutcode="4028f85b508f224c0150935ef2680020" data-appcode="4028f85b5003c9d7015003e212200026"><input type="checkbox" style="visibility: hidden;"> <a href="javascript:void(0);">fluent-20151023-5</a></div><div id="qmk-gen102" style="padding: 5px 0;" data-shortcutcode="4028f85b509388180150938e492c0009" data-appcode="4028f85b508ddbc101508de26f3f0011"><input type="checkbox" style="visibility: hidden;"> <a href="javascript:void(0);">fluent-20151023-1</a></div><div id="qmk-gen103" style="padding: 5px 0;" data-shortcutcode="4028f85b50938818015093926c36000a" data-appcode="4028f85b508ddbc101508de26f3f0011"><input type="checkbox" style="visibility: hidden;"> <a href="javascript:void(0);">ansys</a></div><div id="qmk-gen104" style="padding: 5px 0;" data-shortcutcode="4028f85b50938818015093a0e44e0014" data-appcode="4028f85b508ddbc101508de26f3f0011"><input type="checkbox" style="visibility: hidden;"> <a href="javascript:void(0);">fluent-20151023-6</a></div><div id="qmk-gen105" style="padding: 5px 0;" data-shortcutcode="4028f85b50938818015093a107350015" data-appcode="4028f85b508ddbc101508de26f3f0011"><input type="checkbox" style="visibility: hidden;"> <a href="javascript:void(0);">ansys2</a></div><div id="qmk-gen106" style="padding: 5px 0;" data-shortcutcode="4028f85b50c8df180150cb26f40300e6" data-appcode="4028f85b5003c9d7015003e212200026"><input type="checkbox" style="visibility: hidden;"> <a href="javascript:void(0);">fluent-20151103-3-jieliu</a></div></div>
+						<div>
+							<strong>我的应用</strong>
+							<a href="javascript:void(0);" class="btn" data-name="collapse-btn" for="app">
+								<i class="fa fa-fw fa-lg t-plus fa-angle-double-up"></i>
+							</a>
+							<a href="javascript:void(0);" class="btn" data-name="expand-btn" for="app" style="display:none;">
+								<i class="fa fa-fw fa-lg t-plus fa-angle-double-down"></i>
+							</a>
+							<a href="javascript:void(0);" class="btn pull-right">
+								<i class="fa fa-fw fa-lg fa-cog"></i>管理应用
+							</a>
+						</div>
+						<div id="app" class="well list-group" style="max-height:500px;overflow-y:auto;overflow-x:hidden;"><a id="qmk-gen107" href="javascript:void(0);" class="list-group-item software-item-default-bg" style="padding:5px 15px;border:none;white-space:nowrap;" data-softwarecode="" data-appcode="4028f85b5003c9d7015003f4e1640045"><img src="images/softwares/dyna.png" onerror="this.src='images/softwares/default.png';" width="38" height="32" style="padding:0 6px 0 0;border:none;">dyna</a><a id="qmk-gen108" href="javascript:void(0);" class="list-group-item software-item-default-bg" style="padding:5px 15px;border:none;white-space:nowrap;" data-softwarecode="" data-appcode="4028f85b5003c9d7015003e212200026"><img src="images/softwares/fluent.png" onerror="this.src='images/softwares/default.png';" width="38" height="32" style="padding:0 6px 0 0;border:none;">fluent</a><a id="qmk-gen109" href="javascript:void(0);" class="list-group-item software-item-default-bg" style="padding:5px 15px;border:none;white-space:nowrap;" data-softwarecode="" data-appcode="4028b292500791bf0150079a65ba0003"><img src="images/softwares/fluent.png" onerror="this.src='images/softwares/default.png';" width="38" height="32" style="padding:0 6px 0 0;border:none;">fluent</a><a id="qmk-gen110" href="javascript:void(0);" class="list-group-item software-item-default-bg" style="padding:5px 15px;border:none;white-space:nowrap;" data-softwarecode="" data-appcode="4028f85b508ddbc101508de26f3f0011"><img src="images/softwares/ansys.png" onerror="this.src='images/softwares/default.png';" width="38" height="32" style="padding:0 6px 0 0;border:none;">ansys</a></div>
+						<div>
+							<strong>正在提交</strong>
+							<a href="javascript:void(0);" class="btn" data-name="collapse-btn" for="submitting-jobs">
+								<i class="fa fa-fw fa-lg t-plus fa-angle-double-up"></i>
+							</a>
+							<a href="javascript:void(0);" class="btn" data-name="expand-btn" for="submitting-jobs" style="display:none;">
+								<i class="fa fa-fw fa-lg t-plus fa-angle-double-down"></i>
+							</a>
+						</div>
+						<div id="submitting-jobs" class="well">
+						</div>
+					</div>
+					
+					<div class="col-md-9">
+						<ul class="pager">
+							<li class="previous">
+								<a href="javascript:void(0);">← 前处理</a>
+							</li>
+							<li class="disabled">
+								<a>计算</a>
+							</li>
+							<li class="next">
+								<a href="javascript:void(0);">后处理 →</a>
+							</li>
+						</ul>
+
+<style type="text/css">
+	/* qiaomingkui: change label align mode */
+	.form-horizontal .control-label {
+		text-align: left;
+	}
+
+	.software-item-default-bg {
+		background-color:#f5f5f5;
+	}
+</style>
+
+<div class="well">
+	<div id="project-list">
+		<strong style="color: black;">项目:</strong>
+	<a id="qmk-gen116" href="javascript:void(0);" class="btn btn-success active" data-projectcode="4028f85b50149e5301501740d22d0008">project002</a><a id="qmk-gen117" href="javascript:void(0);" class="btn" data-projectcode="4028f85b50149e53015017418bad000b">project003</a><a id="qmk-gen118" href="javascript:void(0);" class="btn" data-projectcode="4028f85b508ddbc101508e69a383001a">abc</a><a id="qmk-gen119" href="javascript:void(0);" class="btn" data-projectcode="4028f85b5003804c01500394fc88000a">project005</a><a id="qmk-gen120" href="javascript:void(0);" class="btn" data-projectcode="4028f85b50938818015093c0398d002a">sdfsdf</a><a id="qmk-gen121" href="javascript:void(0);" class="btn" data-projectcode="4028f85b50acc2b80150adbb3c940433">testForProTime</a></div>
+	<div id="queue-list" style="margin-top:10px;">
+		<strong style="color: black;">队列:</strong>
+	<a id="qmk-gen115" href="javascript:void(0);" class="btn btn-success active" data-queuecode="4028f85b5003c9d7015003d61337000e">fluent</a></div>
+	<div id="version-list" style="margin-top:10px;">
+		<strong style="color: black;">版本:</strong>
+	<a id="qmk-gen111" href="javascript:void(0);" class="btn btn-success active" data-versioncode="4028f85b5003c9d7015003ded154001d" data-templatecode="4028f85b50c6dbf70150c7001b7200cb">6.3.26</a><a id="qmk-gen112" href="javascript:void(0);" class="btn" data-versioncode="4028f85b5003c9d7015003df1e35001f" data-templatecode="4028f85b50c6dbf70150c700452700d0">12.1.2</a><a id="qmk-gen113" href="javascript:void(0);" class="btn" data-versioncode="4028f85b5003c9d7015003df629a0021" data-templatecode="4028f85b50c6dbf70150c70073f100d5">13.0.0</a><a id="qmk-gen114" href="javascript:void(0);" class="btn" data-versioncode="4028f85b5003c9d7015003df97170023" data-templatecode="4028f85b50c6dbf70150c7009dd100da">14.0.0</a></div>
+</div>
+<div class="col-md-12">
+	<span><strong>作业参数</strong></span>
+	<hr class="hr-primary">
+	<div class="col-md-12" style="min-height: 450px;">
+		<form id="template-form" class="form-horizontal" role="form"><div id="qmk-gen123" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen123-text" class="control-label">作业名</label></div><div class="col-sm-7"><input type="text" class="form-control" id="qmk-gen123-text" placeholder=""><div id="qmk-gen123-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div><div class="col-sm-2"><a href="javascript:void(0);" class="btn btn-block btn-primary"><i class="fa fa-fw fa-paint-brush"></i>设置默认</a></div></div><div id="qmk-gen124" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen124-text" class="control-label">作业描述</label></div><div class="col-sm-7"><textarea class="form-control" id="qmk-gen124-text" placeholder="" style="resize:vertical;"></textarea><div id="qmk-gen124-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div></div><div id="qmk-gen125" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen125-text" class="control-label">核数</label></div><div class="col-sm-7"><input type="text" class="form-control" id="qmk-gen125-text" placeholder=""><div id="qmk-gen125-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div></div><div id="qmk-gen126" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen126-text" class="control-label">单节点核数</label></div><div class="col-sm-7"><input type="text" class="form-control" id="qmk-gen126-text" placeholder=""><div id="qmk-gen126-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div></div><div id="qmk-gen127" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen127-text" class="control-label">工作目录</label></div><div class="col-sm-7"><input type="text" class="form-control" id="qmk-gen127-text" placeholder="" readonly="readonly"><div id="qmk-gen127-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div><div class="col-sm-2"><a href="javascript:void(0);" id="qmk-gen127-btn" class="btn btn-block btn-primary"><i class="fa fa-fw fa-search"></i>浏览</a></div></div><div id="qmk-gen128" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen128-text" class="control-label">journal文件</label></div><div class="col-sm-7"><select id="qmk-gen128-type" class="form-control" style="display:inline-block;width:25%;margin-right:2%;"><option value="local">本地</option><option value="remote">主机</option></select><input type="text" class="form-control" id="qmk-gen128-text" style="display:inline;width:73%;" readonly="readonly"><div id="qmk-gen128-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div><div class="col-sm-2"><a href="javascript:void(0);" id="qmk-gen128-btn" class="btn btn-block btn-primary"><i class="fa fa-fw fa-folder-open-o"></i>选择</a></div></div><div id="qmk-gen129" class="form-group" style="display: block;"><div class="col-sm-3"><label class="control-label">其他输入文件(.cas .dat等)</label></div><div class="col-sm-9"><a href="javascript:void(0);" id="qmk-gen129-localbtn" class="btn btn-primary" style="width:37%;margin-right:2%;"><i class="fa fa-fw fa-upload"></i>从本地上传</a><a href="javascript:void(0);" id="qmk-gen129-remotebtn" class="btn btn-primary" style="width:37%;"><i class="fa fa-fw fa-soundcloud"></i>从主机上传</a><a href="javascript:void(0);" id="qmk-gen129-hidebtn" class="btn" title="隐藏" style="display:none;"><i class="fa fa-fw fa-minus"></i></a><a href="javascript:void(0);" id="qmk-gen129-showbtn" class="btn" title="显示" style="display:none;"><i class="fa fa-fw fa-plus"></i></a><div id="qmk-gen129-file" style="margin: 5px 0 0;display:none;"></div><div id="qmk-gen129-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div></div><div id="qmk-gen130" class="form-group" style="display: block;"><div class="col-sm-3"><label for="qmk-gen130-combobox" class="control-label">维度及精度</label></div><div class="col-sm-7"><select id="qmk-gen130-combobox" class="form-control"><option value="3d">3d</option><option value="2d">2d</option><option value="3ddp">3ddp</option><option value="2ddp">2ddp</option></select><div id="qmk-gen130-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div></div><div id="qmk-gen131" class="form-group" style="display: none;"><div class="col-sm-3"><label for="qmk-gen131-text" class="control-label">其他参数</label></div><div class="col-sm-7"><input type="text" class="form-control" id="qmk-gen131-text" placeholder=""><div id="qmk-gen131-err" class="alert alert-danger" role="alert" style="margin: 5px 0 0;display:none;"></div></div></div></form>
+	</div>
+</div>
+<div class="col-md-12" style="margin-bottom:50px;">
+	<hr class="hr-primary">
+	<div class="col-md-4">
+		<a id="preview-btn" href="javascript:void(0);" class="btn btn-block btn-lg btn-success">
+			<i class="fa fa-fw fa-search "></i>命令预览
+		</a>
+	</div>
+	<div class="col-md-4">
+		<a id="saveparam-btn" href="javascript:void(0);" class="btn btn-block btn-lg btn-success">
+			<i class="fa fa-fw fa-floppy-o"></i>保存到常用
+		</a>
+	</div>
+	<div class="col-md-4">
+		<a id="submit-btn" href="javascript:void(0);" class="btn btn-block btn-lg btn-success">
+			<i class="fa fa-fw fa-calculator"></i>提交作业
+		</a>
+	</div>
+</div>
+
+<div id="preview_panel" class="modal fade">
+	<div class="modal-dialog modal-sm" style="top: 60px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">×</button>
+				<h4>命令预览</h4>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="confirm_submit_panel" class="modal fade">
+	<div class="modal-dialog modal-sm" style="top: 60px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">×</button>
+				<h4>确认提交？</h4>
+			</div>
+			<div class="modal-footer">
+				<button type="button" data-name="yes" class="btn btn-primary">Yes</button>
+				<button type="button" data-name="no" class="btn btn-primary">No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	var i18n = {
+		error:'失败',
+
+		btn_file_browser:'浏 览',
+		title_filemanage:'文件管理',
+
+		sww_duplicatedFile:'所选文件中有重名文件',
+		sww_edit_hotkey_tip:'双击启用编辑，编辑状态中按ESC完成编辑',
+		sww_script_param_expand_btn:'点此查看或隐藏可用的页面参数',
+		sww_check_script:'查看脚本',
+		sww_check_script_tip:'前往脚本预览页面查看脚本，或对脚本进行修改',
+		sww_goback_param:'返回前页',
+		sww_goback_param_tip:'返回参数选择页面',
+		sww_edit_script:'启用编辑',
+		sww_edit_script_tip:'启用脚本编辑模式来修改脚本，你也可以双击脚本内容来启用',
+		sww_finish_edit:'完成编辑',
+		sww_finish_edit_tip:'完成脚本编辑，你也可以在编辑状态时按下ESC键来完成编辑',
+		sww_script_title:'查看、编辑脚本',
+		sww_param_usage_tip:'注意：如要引用某个页面参数，请使用<b>\u0024\u007Bname\u007D</b>，而不要使用<b>$name</b>这种方式',
+		sww_param_order:'排序：',
+		sww_param_order_default:'默认',
+		sww_param_order_alphabet:'字母',
+
+		shortcut_unknowVersion:'未知的模板版本：',
+		template_setdefault:'设置默认',
+
+		error_submitjobforapplet:'提交失败：Applet传输页面被关闭',
+		error_submitjobformkdir:'提交失败：创建工作目录失败',
+		error_submitjobforupload:'提交失败：文件上传失败',
+	};
+</script>
+
+<!--
+<script type="text/javascript" src="js/myXfinity/myApp/components/Qmk.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/TemplateParser.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/InternalFunctions.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/TemplateUtilities.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/RemoteFileBrowser.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/AbstractComponent.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/TextField.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/TextArea.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/NumberField.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/ComboBox.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/RemoteDirectory.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/SingleFile.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/MultipleFile.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/ValueExprParser.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/ValidationExprParser.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/CombinationExprParser.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/Variable.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/Validator.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/components/Combinator.js"></script>
+
+<script type="text/javascript" src="js/deployJava.js"></script>
+<script type="text/javascript" src="js/PluginManager.js"></script>
+<script type="text/javascript" src="js/myXfinity/myFile/FileUtil.js"></script>
+<script type="text/javascript" src="js/myXfinity/myApp/templateParam.js"></script>
+-->
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--
+	<script type="text/javascript">
+		var $appCode = '';
+		var $proCode = '';
+	</script>
+	<script type="text/javascript" src="js/myXfinity/myApp/myApp.js"></script>
+	-->
+</body>
+</html>

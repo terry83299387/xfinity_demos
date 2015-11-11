@@ -1,0 +1,32 @@
+﻿body, ul, p { margin: 0; padding: 0; }
+	body { font: normal 12px 微软雅黑; }
+	ul, li, dt, dd, dl { list-style: none; padding: 0; margin: 0; }
+	a { text-decoration: none; }
+	img { border: 0; }
+	h1 { font-size: 100%; font-weight: normal; padding: 0; margin: 0; }
+	a { text-decoration: none; color: #6c6c6c; }
+    a:hover { color: #ff4200; }
+	h1 { text-indent: -5000px; display: block; height: 0; font-size: 0; line-height: 0; overflow: hidden; }
+	body { min-width: 1000px; padding-top: 0px;}
+	.defmenue{
+		color:red;
+	}
+	.header { height: 50px;width: 100%; margin: 0 auto; position: relative; }
+	.topIndex {padding: 10px 50px 30px 5px; align: center;height: 40px;}
+		.topIndex span{color:white}
+   		.topIndex li {font-size:12px; float: left; line-height:13px; height:40px;width:50px; text-align: center; }
+		.topIndex a { color: #000; display: block; width: 150px; height: 13px;}
+    	.topIndex span:hover { color: red; }
+	.navIndex {padding: 50px 50px 30px 700px; align: center;height: 40px;}
+		.navIndex span{color:white;font-weight:bold;}
+   		.navIndex li {font-size:14px; float: left; line-height:13px; height:40px;width:100px; text-align: center; }
+		.navIndex a { color: #000; display: block; width: 150px; height: 13px;}
+    	.navIndex span:hover { color: red; }
+	.toolsTop{
+		background-color:#D6E2F3;
+		border-top-width:0;
+		border-right-width:0;
+		border-bottom-width:0;
+		height:30px;
+		border-left-width:0;
+	}

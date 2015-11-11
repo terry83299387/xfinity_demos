@@ -1,0 +1,27 @@
+﻿
+.container{
+	width:25%;
+	margin:10px;
+	margin-right:0px;
+	margin-left:8%;
+	float:left;
+	border:0;
+	}
+.container li{
+	cursor: pointer;
+	}
+.container li:hover {background:#f4f4f4; color:#000;}
+.imgMargin{
+	margin-left:10px;
+	margin-right:5px;
+	}
+.secImgMargin{
+	margin-left:30px;
+	margin-right:5px;
+	}
+.contentPanel{
+	float:left;
+	width:55%;
+	margin:10px
+	}
+

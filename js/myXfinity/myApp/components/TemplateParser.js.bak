@@ -1,0 +1,1220 @@
+/**
+ * @param softwareInfo the detail information of choosen software,
+ *        includes softwareCode, name (softwareName), description, etc.
+ * @param (optional) the object of other options
+ */
+
+var Template;
+if (!Template) {
+	Template = {};
+}
+
+Template.TemplateParser = function(softwareInfo, options) {
+	// call super class constructor
+	Template.TemplateParser.superclass.constructor.call(this);
+
+	// TODO 有效性验证（各参数、模板exception、version等）
+	// TODO for now, i would ignore the options argument
+
+	/* ------------------------- Fields ----------------------- */
+	/**
+	 * read-only
+	 */
+	this.tplUtil = Template.TemplateUtilities;
+	/**
+	 * read-only
+	 */
+	this.id = this.tplUtil.generateUniqueID();
+	/**
+	 * read-only
+	 */
+	this.version;
+
+	/* --------------------- Protected Fields -------------------- */
+	this._innerPanel;
+	this._formPanel;
+	this._advBtn;
+	this._advFormPanel;
+
+	/* --------------------- Local Variables -------------------- */
+	var _templateCfg;
+	var _components = {};
+	var _variables = {};
+	var _combinators = {};
+
+	var _winClosed = false;
+	// flags are used to indicate validating results
+	// before submitting the job
+	var _validError, _validMsg;
+	// submitting job id
+	var _jobId = 0;
+
+	/* ------------------------ Methods ----------------------- */
+	this.init = function() {
+		this._initEvents();
+		this._createWin(); // continue after get template data
+		this._getTemplate();
+	};
+
+	this.getComponentByType = function(type) {
+		var components = _templateCfg.component || [];
+		var id, cfg, comp;
+		var len = components.length;
+		for (var i=0; i<len; i++) {
+			cfg = components[i];
+			if (cfg.type == type) {
+				id = cfg.id;
+				comp = this.getComponent(id);
+				return comp;
+			}
+		}
+	};
+
+	this.getComponentsByCompType = function(type) {
+		var comps=[], comp;
+		for (var id in _components) {
+			comp = _components[id];
+			if (comp.type == type) {
+				comps.push(comp);
+			}
+		}
+		return comps;
+	};
+
+	this.addComponent = function(id, component) {
+		_components[id] = component;
+	};
+
+	this.getComponent = function(id) {
+		if (_components.hasOwnProperty(id))
+			return _components[id];
+		return null;
+	};
+
+	this.getAllComponents = function() {
+		return _components;
+	};
+
+	this.addVariable = function(id, variable) {
+		_variables[id] = variable;
+	};
+
+	this.getVariable = function(id) {
+		if (_variables.hasOwnProperty(id))
+			return _variables[id];
+		return null;
+	};
+
+	this.getAllVariables = function() {
+		return _variables;
+	};
+
+	this.addCombinator = function(id, combinator) {
+		_combinators[id] = combinator;
+	};
+
+	/**
+	 * an entity is an component or a variable,
+	 * but not a combinator
+	 */
+	this.getEntity = function(id) {
+		return this.getComponent(id)
+			|| this.getVariable(id);
+	};
+
+	this.hasWinClosed = function() {
+		return _winClosed;
+	};
+
+	this.getSoftwareCode = function() {
+		return softwareInfo.softwareCode;
+	};
+
+	this.getSoftwareName = function() {
+//		return softwareInfo.softwareName;
+		return softwareInfo.name;
+	};
+
+	this.getVersion = function() {
+		return this.version;
+	};
+
+	this.initValidated = function() {
+		// TODO
+//		alert('initValidated');
+	};
+
+	this.submitValidated = function(validator, valid, level, errInfo) {
+		if (!valid) {
+			_validError.push({
+				'validator' : validator,
+				'level'     : level,
+				'errInfo'   : errInfo
+			});
+		}
+	};
+
+	this.getTemplatePanel = function() {
+		return this._innerPanel;
+	};
+
+	/* -------------------- Private/Protected Methods -------------------- */
+	this._initEvents = function() {
+		this.events = {
+			'submitting'   : true,
+			'submitted'    : true, // 以前，当作业提交成功并且用户点击了“继续提交新作业”按钮时会触发该事件。
+								   // 由于需求变动，现在需要在作业提交成功后立即派发表示作业已成功提交的事件，
+								   // 但模板中都用到了这个事件，所以不便修改。
+								   // 所以我新添加一个jobsubmitted事件，而原有submitted事件的意义则等同于“继续提交新作业”（所以更恰当的名称应该是continuesubmit）
+								   // 这不是好的做法（jobsubmitted和submitted看起来是一回事），但没办法，这就是历史的包袱
+								   // 2014.11.18 qiaomingkui
+			'jobsubmitted' : true,
+			'paramsaved'   : true, // after parameters (shortcut) saved
+			'shortcutexopsubmit' : true, // after shortcut brief desc / show on desktop saved
+			'filetransfer' : true // fire while files transferring
+		};
+
+		// add filetransfer listener
+		this.addListener('filetransfer', this._handleFileTransfer.createDelegate(this));
+	};
+
+	this._getSubmitButton = function() {
+		return new Ext.Button({
+			id   : this.id + '_submitBtn',
+			text : i18n.sww_submit_job_btn,
+			handler : this._submit,
+			iconCls : 'hd-correct-single',
+			tooltip : i18n.sww_tpl_subBtnTip,
+			style : 'margin-right: 5px;',
+			scope : this
+		});
+	};
+
+	this._getPreviewButton = function() {
+		return new Ext.Button({
+			id   : this.id + '_previewBtn',
+			text : i18n.run_preview,
+			handler : this._preview,
+			iconCls : 'hd-magnifier',
+			tooltip : i18n.sww_tpl_preBtnTip,
+			style : 'margin: 0 5px;',
+			scope : this
+		});
+	};
+
+	this._getSaveButton = function() {
+		return new Ext.Button({
+			id   : this.id + '_saveBtn',
+			text : i18n.template_saveParams,
+			handler : this._saveParams,
+			disabled : true, // TODO disable for the moment
+			iconCls : 'hd-add-single',
+			tooltip : i18n.sww_tpl_saveBtnTip,
+			style : 'margin-left: 5px;',
+			scope : this
+		});
+	};
+
+	this._getBBar = function() {
+		var submitBtn = this._getSubmitButton();
+		var previewBtn = this._getPreviewButton();
+		var saveBtn = this._getSaveButton();
+
+		return new Ext.Toolbar({
+			style : 'padding-left: 200px;',
+			items : [previewBtn, saveBtn, submitBtn, '->']
+		});
+	};
+
+	this._createInnerPanel = function() {
+		var bbar = this._getBBar();
+
+		this._innerPanel = new Ext.Panel({
+			id : this.id + 'submitPanel',
+			title : this.getSoftwareName(),
+			autoScroll : true,
+			items : new Ext.Panel({
+				border : false,
+				html  : '&nbsp;'
+			}),
+			bbar : bbar
+		});
+
+		return this._innerPanel;
+	};
+
+	this._createWin = function() {
+		this._createInnerPanel();
+
+		this._innerPanel.on('destroy', function() {
+			_winClosed = true;
+		}, this);
+	};
+
+	this._getTemplate = function() {
+		this.tplUtil.rpcProxy(
+			'url',
+			'showTemplate.action',
+			{
+				softwareCode : softwareInfo.softwareCode
+			},
+			this._templateFetched,
+			this
+		);
+	};
+
+	this._templateFetched = function(success, resp, opts) {
+		// judge the window has been closed
+		if (_winClosed) {
+			return;
+		}
+
+		var showErrMsg = function(msg) {
+			Ext.Msg.show({
+				title : i18n.shortcut_error,
+				msg : msg,
+				buttons : Ext.MessageBox.OK,
+				icon : Ext.MessageBox.ERROR,
+				minWidth : 120,
+				width : 200
+			});
+		}
+
+		if (success !== true) {
+			showErrMsg('Error!! Get template data failed!');
+			return;
+		}
+
+		var obj = Ext.util.JSON.decode(resp.responseText);
+		var exception = obj.exception;
+		if (exception == 'noAuthority') {
+			showErrMsg(i18n.shortcut_noAuthority);
+			return;
+		} else if (exception) {
+			showErrMsg(exception);
+			return;
+		}
+
+		_templateCfg = obj.template;
+		var version = _templateCfg.version;
+		if (!version || version != '1.0') {
+			showErrMsg(i18n.shortcut_unknowVersion + version);
+			return;
+		}
+		this.version = version;
+
+		// go on to process after template data returns
+		_sortComponents();
+		this._initRootVars();
+		this._getLblText(); // goto _init()
+	};
+
+	/*
+	 * continue to initialize after getting label and description
+	 */
+	this._init = function(success, labels) {
+		// judge the window has been closed
+		if (_winClosed) {
+			return;
+		}
+
+		_restoreI18N(labels);
+
+		var items = this._initComponents();
+		this._initComponents(items);
+		this._onShow();
+
+		if (softwareInfo.type == 'para') {
+			this._reloadParaValue();
+		} else if(softwareInfo.type == 'jobPara') {
+			this._reloadJobParaValue();
+		}
+	};
+
+	/*
+	 * do other things after window shown
+	 */
+	this._onShow = function() {
+		var obj;
+
+		/*
+		 * 由于联动可以定义在任何地方（通过source和targe来指定源与目标）
+		 * 因此，其初始化需要在最后进行，否则可能获取不到关联的实体
+		 */
+		for (var id in _combinators) {
+			obj = _combinators[id];
+			obj.init();
+		}
+		for (var id in _variables) {
+			obj = _variables[id];
+			obj.reload();
+		}
+		for (var id in _components) {
+			obj = _components[id];
+			obj.reload();
+		}
+
+		// map the Accelerator Key (Ctrl+Enter) to handle
+		// submit action
+//		new Ext.KeyMap(_win.getEl(), {
+//			ctrl : true,
+//			key : Ext.EventObject.ENTER,
+//			fn : this._submit,
+//			scope : this
+//		});
+
+		this._innerPanel.getEl().unmask();
+	};
+
+	/*
+	 * 根据所有component的label code和description code查询国际化文本
+	 * 并设置到相应的component配置中
+	 */
+	this._getLblText = function() {
+		var cfgs = _templateCfg.component || [];
+		var labels = [];
+		var cfg, label/*, desc*/, len=cfgs.length;
+		for (var i=0; i<len; i++) {
+			cfg = cfgs[i];
+			label = cfg.label;
+//			desc = cfg.description;
+			// allow to ignore label
+			if (label) labels.push(label);
+//			if (desc) {
+//				labels.push(desc); // ignore descriptions temporarily
+//			}
+		}
+		this.tplUtil.delayFetchLabels.delayFetch(labels, this._init, this);
+	};
+
+	/*
+	 * init root variables
+	 */
+	this._initRootVars = function() {
+		var cfgs = _templateCfg['variable'] || [];
+		var cfg, variable, len=cfgs.length;
+		for (var i=0; i<len; i++) {
+			cfg = cfgs[i];
+			variable = new Template.Variable(this, cfg);
+			variable.init();
+			this.addVariable(cfg.id, variable);
+		}
+	};
+
+	/*
+	 * init components.
+	 * just init, not loads data
+	 */
+	this._initComponents = function() {
+		var items = [];
+		var advItems = [];
+		var cfgs = _templateCfg.component || [];
+		// create components
+		var cfg, item;
+		for (var i=0; i<cfgs.length; i++) {
+			cfg = cfgs[i];
+			var item = this.tplUtil.getTemplateComponent(cfg, this);
+			if (item == null) continue;
+
+			item.init();
+			this.addComponent(cfg.id, item);
+
+			if (cfg.advanced)
+				advItems.push(item);
+			else
+				items.push(item);
+		}
+
+		return [items, advItems];
+	};
+
+	this._hidePlaceholderPanel = function() {
+		this._innerPanel.remove(this._innerPanel.getComponent(0));
+	};
+
+	/*
+	 * init components (items).
+	 */
+	this._initComponents = function(items) {
+		var comps = items[0];
+		var advComps = items[1];
+		this._hidePlaceholderPanel();
+
+		this._formPanel = new Ext.form.FormPanel({
+			id : this.id + 'form',
+			border : false,
+			style : 'margin-top:15px;margin-bottom:10px;',
+			defaults : {
+				width : '100%',
+				labelStyle : 'font-size:11px',
+				bodyStyle : 'padding-left:50px'
+			},
+			items : comps
+		});
+		this._innerPanel.add(this._formPanel);
+
+		if (advComps.length > 0) {
+			this._advBtn = new Ext.Button({
+				template : new Ext.Template('<span style="margin-left:50px;">'
+						+ '<button style="font-size:9pt;color:blue;">'
+						+ i18n.btn_advancecheck + '<button></span>'),
+				handler : this._switchAdvComponentsVisible,
+				scope   : this
+			});
+			this._innerPanel.add(this._advBtn);
+
+			var _hideMode = 'offsets';
+			var browser = Ext.ux.Util.getExplorer();
+			if(browser == 'IE') {
+				var browserVer = navigator.appVersion.split(';');
+				browserVer = browserVer[1].replace(/[ ]/g, '');
+				if (browserVer == 'MSIE7.0' || browserVer == 'MSIE6.0') {
+					_hideMode = 'display'; // replace hideMode "offsets" with "display"
+										   // in order to fix the bug that can not render
+										   // advanced-form-panel correctly in ie 6 and 7.
+										   // but there is a problem in "display" mode:
+										   // the combobox tooltip button has a wrong layout,
+										   // thus, this mode is only used in ie 6 and 7.
+				}
+			}
+			this._advFormPanel = new Ext.form.FormPanel({
+				id : this.id + 'advanced_form',
+				border : false,
+				hidden : true,
+				hideMode : _hideMode,
+				style : 'margin-top:5px;margin-bottom:10px;',
+				defaults : {
+					width : '100%',
+					labelStyle : 'font-size:11px',
+					bodyStyle : 'padding-left:50px'
+				},
+				items : advComps
+			});
+			this._innerPanel.add(this._advFormPanel);
+			// placeholder
+//			this._innerPanel.add({
+//				border : false,
+//				height : 10
+//			});
+		}
+		this._innerPanel.doLayout(true);
+	};
+
+	this._saveParams = function() {
+		var content = '';
+		var comp, desc, value, labelCode;
+		for (var id in _components) {
+			comp = _components[id];
+			value = comp.getPersistenceData();
+			if (!value) continue;
+
+			desc = comp.getPersistenceDesc();
+			labelCode = comp.getLabelCode();
+
+			content += (content && '|') + id + ','
+					+ _encodeParam(value)    + ','
+					+ _encodeParam(desc)     + ','
+					+ _encodeParam(labelCode);
+		} // getPersistenceData, getPersistenceDesc, restorePersistenceData
+
+		var softwareCode = this.getSoftwareCode();
+		var softwareName = this.getSoftwareName();
+
+		var jsdlCst = this.tplUtil.jsdlKeys;
+		var jobName = this.getComponentByType(jsdlCst.JOB_NAME).getValue();
+		var desktopName = jobName || softwareName;
+		if (desktopName && desktopName.length > 30) {
+			desktopName = desktopName.substring(0, 30);
+		}
+
+		var params = {
+			softwareCode : softwareCode,
+			tag          : softwareName,
+			content      : content,
+			shortcutName : softwareName,
+			desktopName  : desktopName,
+			objectCode   : softwareCode,
+			type         : 'para'
+		};
+		// save shortcut
+		Ext.Ajax.request({
+			url : 'addTemplateParams.action',
+			params : params,
+			success : function(resp, opts) {
+				var respObj = Ext.util.JSON.decode(resp.responseText);
+				var exception = respObj.exception;
+				if (exception) {
+					Ext.Msg.alert(i18n.error, exception);
+					return;
+				}
+
+				// setup fields that 'paramsaved' event listener maybe need.
+				params.category = softwareInfo.category;
+				// new shortcut code
+				params.shortcutCode = respObj.shortcut.shortcutCode;
+				// description
+				params.description = respObj.shortcut.description;
+				// desktop name
+//				params.desktopName = tagName;
+				// reference software
+				params.refSoftware = (softwareInfo.type == 'para'
+						? softwareInfo.refSoftware : softwareInfo);
+
+				this.fireEvent('paramsaved', params);
+				this._shortcutSavedExOp(params);
+			},
+			failure : function(resp, opts) {
+				var resultArray = (Ext.util.JSON.decode(resp.responseText)).exception;
+				Ext.Msg.alert(i18n.error, resultArray || 'Unkown exception');
+			},
+			scope   : this
+		});
+	};
+
+	this._shortcutSavedExOp = function(shortcut) {
+		var shortcutCode = shortcut.shortcutCode;
+
+		var exOp = new Template.ShortcutSavedExOp(shortcutCode, this.id);
+
+		// remove if already exists a tooltip
+		exOp.removeExistTooltip();
+
+		// generate tooltip
+		var html = exOp.getTooltipHtml();
+		this._innerPanel.getBottomToolbar().getEl().insertHtml('beforeBegin', html, false);
+
+		// animation to show
+		exOp.fadeInTooltip();
+		exOp.afterRender();
+
+		// after submit
+		exOp.addListener('submit', function(shortcutCode, briefDesc, showOnDesktop) {
+			if (briefDesc)	shortcut.desktopName = briefDesc.substring(0, 30);
+			this.fireEvent('shortcutexopsubmit', shortcut, briefDesc, showOnDesktop);
+		}, this);
+		// ignore close
+//		exOp.addListener('close', function(){console.log('param ex op close')}, this);
+	};
+
+	/*
+	 * 1. mask
+	 * 2. upload local files
+	 * 3. get params
+	 * 4. submit
+	 * 5. unmask
+	 */
+	this._submit = function() {
+		// valid components
+		_validError = [];
+		this.fireEvent('submitting');
+		if (_validError.length > 0) {
+			var submit = this._handleValidError();
+			if (!submit) return;
+		}
+
+		var dupFiles = this._checkFileDup();
+		if (dupFiles.length > 0) {
+			Ext.Msg.alert(i18n.error, i18n.sww_duplicatedFile);
+			return;
+		}
+
+		Ext.Msg.show({
+			title : i18n.prompt,
+			msg : i18n.prompt_submitjob,
+			buttons : Ext.MessageBox.OKCANCEL,
+			icon : Ext.MessageBox.WARNIN,
+			minWidth : 120,
+			width : 200,
+			fn : function(btn) {
+				if (btn != 'ok') return;
+
+				++_jobId; // increase job id
+//				this._innerPanel.getEl().mask(i18n.mask_submitjob);
+				// upload local files
+				this._uploadFiles();
+			},
+			scope : this
+		});
+	};
+
+	// (protected)
+	this._handleValidError = function() {
+		// TODO 显示错误信息
+		// 如果只有warn级别的错误，则询问用户是否一定要提交；
+		// 如果有error级别的错误，不允许提交
+
+		// 如果高级选项中有错误，展开高级选项
+		if (this._hasAdvValidError()) {
+			this._advFormPanel.setVisible(true);
+		}
+
+		return false;
+	};
+
+	this._preview = function() {
+		var param = this._getSubmitParam();
+
+		this.tplUtil.rpcProxy('url',
+				'getPreview.action', param, this._previewCallback, this);
+	};
+
+	this._checkFileDup = function() {
+		// valid file duplicating
+		// 以前的版本如果有重复文件，会导致提交失败
+		// 注意：如果两文件的名称和路径都相同，则属于同一个文件，而不算重复文件，但注意在上传时需要过滤（避免重复上传）
+		// 只有名称相同但路径不同的文件，才认为是重复文件。
+		// 因为有时同一个文件确实需要在不同的地方使用（例如命令中的不同参数）
+		// 而名称相同路径不同的文件是无法同时上传到工作目录下的
+
+		var fileComp, len;
+		var singleFiles = this.getComponentsByCompType('SingleFile');
+		len = singleFiles.length;
+
+		var o={}, v, n, dupFiles=[];
+		outer1:
+		for (var i=0; i<len; i++) {
+			fileComp = singleFiles[i];
+			v = fileComp.getRawValue();
+			if (!v) continue;
+
+			n = fileComp.getFileName();
+			if (o[n]) {
+				for (var j=0; j<o[n].length; j++) {
+					if (o[n][j] == v) {
+						continue outer1;
+					}
+				}
+
+				o[n].push(v);
+				dupFiles.push(v);
+			} else {
+				o[n] = [];
+				o[n].push(v);
+			}
+		}
+
+		var multiFiles = this.getComponentsByCompType('MultipleFile');
+		len = multiFiles.length;
+		var files;
+		outer2:
+		for (var i=0; i<len; i++) {
+			fileComp = multiFiles[i];
+			files = fileComp.getAllFiles();
+			if (files.length == 0) continue;
+
+			for (var j=0; j<files.length; j++) {
+				v = files[j];
+				n = fileComp.getFileName(v);
+				if (o[n]) {
+					for (var k=0; k<o[n].length; k++) {
+						if (o[n][k] == v) {
+							continue outer2;
+						}
+					}
+
+					o[n].push(v);
+					dupFiles.push(v);
+				} else {
+					o[n] = [];
+					o[n].push(v);
+				}
+			}
+		}
+
+		return dupFiles;
+	};
+
+	this._uploadFiles = function() {
+		var localFiles = this._getLocalFiles();
+		var jsdlCst = this.tplUtil.jsdlKeys;
+		var jobName = this.getComponentByType(jsdlCst.JOB_NAME).getValue();
+
+		// fire filetransfer event
+		this.fireEvent('filetransfer', {
+			id       : this.id + _jobId,
+			jobName  : jobName,
+			progress : (localFiles.length == 0 ? 100: 0),
+			error    : null,
+			scope    : this
+		});
+
+		// no local file need to upload
+		if (localFiles.length == 0) {
+			var param = this._getSubmitParam();
+			var afterSubmit = this._submitCallback.createDelegate(this, [_jobId], true);
+			this._doSubmit(param, afterSubmit);
+			return;
+		}
+
+		var clusterComp = this.getComponentByType(jsdlCst.CLUSTER);
+		var clusterCode = clusterComp.getValue();
+
+		var cluster = getCluster(clusterCode, function(cluster) {
+			if (!cluster) {
+				this._innerPanel.getEl().unmask();
+				return;
+			}
+
+			var workDirComp = this.getComponentByType(jsdlCst.WORK_DIR);
+			var workDir = workDirComp.getValue();
+
+			// upload
+			var uploadApplet = Ext.sccportal.PluginManager.getFileTransfer({
+				host                 : cluster.host,
+				user                 : cluster.hostUserName,
+				passwd               : cluster.pwd,
+				port                 : cluster.fileTransferPort,
+				clientkey            : cluster.clientKey,
+				fileTransferProtocol : cluster.fileTransferProtocol,
+				serverName           : cluster.clusterName,
+				home                 : workDir,
+				files                : localFiles.join('|'),
+				module               : 'job',
+				dlgtype              : 'Upload'
+			});
+
+			// listen to file upload progress
+			if (uploadApplet != null) {
+				var uploadListener = new Ext.util.TaskRunner();
+				var thread = this._getUploadListenerThread(uploadListener, uploadApplet);
+				uploadListener.start(thread);
+			}
+		}, this);
+	};
+
+	this._doSubmit = function(param, afterSubmit) {
+		this.tplUtil.rpcProxy('url',
+				'doSubmit.action', param, afterSubmit, this);
+	};
+
+	this._getUploadListenerThread = function(curThread, uploadApplet) {
+		var jobId = _jobId;
+		var param = this._getSubmitParam();
+		var timeoverCount = 0;
+
+		return {
+			run : function() {
+				// this will never happen
+				/*if (!Ext.getCmp(this.id + 'submitPanel')) {
+					curThread.stopAll();
+					// file transfer error
+					this.fireEvent('filetransfer', {
+						id       : this.id + jobId,
+						progress : -1,
+						error    : 'error! transfer extension has been closed.',
+						scope    : this
+					});
+					return;
+				}*/
+
+				var status = uploadApplet.getStatus();
+				var error = false;
+				var msg;
+				switch (status) {
+					case '100':
+						curThread.stopAll();
+						var afterSubmit = this._submitCallback.createDelegate(this, [jobId], true);
+						this._doSubmit(param, afterSubmit);
+						break;
+					case 'exception_terminate':
+						error = true;
+						msg = i18n.error_submitjobforapplet;
+						break;
+					case 'mk_workingdir_failed':
+						error = true;
+						msg = i18n.error_submitjobformkdir;
+						break;
+					case 'transfer_file_failed':
+						error = true;
+						msg = i18n.error_submitjobforupload;
+						break;
+					case 'response_timeover':
+						timeoverCount++;
+						if (timeoverCount >= 3) {
+							error = true;
+							msg = 'File transfer might be closed!';
+						}
+						break;
+					default: // file transferring
+						timeoverCount = 0; // reset timeoverCount
+						break;
+				}
+
+				if (error) {
+					curThread.stopAll();
+					this.fireEvent('filetransfer', {
+						id       : this.id + jobId,
+						progress : -1,
+						error    : msg,
+						scope    : this
+					});
+				} else {
+					var progress = parseInt(status);
+					this.fireEvent('filetransfer', {
+						id       : this.id + jobId,
+						progress : progress,
+						error    : null,
+						scope    : this
+					});
+				}
+			},
+			scope : this,
+			interval : 2000
+		}
+	};
+
+	this._getSubmitParam = function() {
+		var param = {};
+		var comp;
+		for (var id in _components) {
+			comp = _components[id];
+			param[id] = comp.getValue();
+			/*
+			 * 有些项，例如集群、队列、项目等，会用到名称，也就是
+			 * ComboBox的text。所以将ComboBox的text也放到参数中提交
+			 * 
+			 * 很奇怪为什么要这样做（使用ComboBox的text）！
+			 * 但为了保持兼容，暂时只能这样处理了
+			 */
+			if (comp.type == 'ComboBox') {
+				param[id+'Text'] = comp.getText();
+			}
+		}
+		// software code, software name
+		var jsdlCst = this.tplUtil.jsdlKeys;
+		param[jsdlCst.SOFTWARE_CODE] = this.getSoftwareCode();
+		param[jsdlCst.SOFTWARE_NAME] = this.getSoftwareName();
+
+		return param;
+	};
+
+	this._getLocalFiles = function() {
+		var files = [];
+		var o = {};
+
+		var fileComp, len;
+		var singleFiles = this.getComponentsByCompType('SingleFile');
+		len = singleFiles.length;
+		var v;
+		for (var i=0; i<len; i++) {
+			fileComp = singleFiles[i];
+			if (fileComp.getType() == fileComp.LOCAL
+					&& (v=fileComp.getRawValue())) {
+				if (o[v]) continue; // duplicate file
+				files.push(v);
+				o[v] = true;
+			}
+		}
+
+		var multiFiles = this.getComponentsByCompType('MultipleFile');
+		len = multiFiles.length;
+		var t;
+		for (var i=0; i<len; i++) {
+			fileComp = multiFiles[i];
+			if ((v=fileComp.getLocalFiles()).length > 0) {
+//				files = files.concat(v);
+				for (var j=0; j<v.length; j++) {
+					t = v[j];
+					if (o[t]) continue; // duplicate file
+					files.push(t);
+					o[t] = true;
+				}
+			}
+		}
+
+		return files;
+	};
+
+	this._submitCallback = function(success, resp, options) {
+		var obj = Ext.util.JSON.decode(resp.responseText);
+		var exception = obj.exception;
+		if (!exception) {
+			// refresh job manager
+//			Ext.scc.JobListPanel.Util.refresh();
+//			Ext.scc.JobSearchPanel.Util.refresh();
+		}
+
+		var jobId = arguments[arguments.length-1];
+		this.fireEvent('jobsubmitted', {
+			id      : this.id + jobId,
+			jobCode : obj.sccJobCode,
+			error   : exception,
+			scope   : this
+		});
+
+		// show post handler
+		this._innerPanel.getEl().unmask();
+		var mask = '<div id="' + this.id + '-postHandle" style="cursor:default;">'
+//			+ '<p><b>' + (localFiles.length == 0 ? i18n.template_filetrans_optionaltitlenofile : i18n.template_filetrans_optionaltitle) + '</b><br/>'
+			+ '<p><b>' + i18n.sww_filetrans_submitsuccess + '</b><br/>'
+			+ '<a id="' + this.id + '-continue" class="x-btn"><img src="images/template/hd_add_single_1.png" />' + i18n.template_continuesubmitting + '</a><br/>'
+			+ '<a id="' + this.id + '-back" class="x-btn"><img src="images/template/28.gif" />' + i18n.template_goback + '</a><br/>'
+			+ '</p></div>';
+		this._innerPanel.getEl().mask(mask);
+		Ext.get(this.id + '-continue').addListener('click', this._postHandleContinue, this);
+		Ext.get(this.id + '-back').addListener('click', this._postHandleBack, this);
+	};
+
+	// show file transfer progress bar
+	this._handleFileTransfer = function(params) {
+		if (!params) return;
+
+		var id = 'submitfiletransfer_' + params.id;
+		var transferPanel = document.getComponentById(id);
+
+		if (!transferPanel) { // new transfer
+			var jobName = params.jobName;
+			var progress = params.progress;
+			if (jobName.length > 23)
+				jobName = jobName.substring(0, 20) + '...';
+			progress = progress < 0 ? 0 : progress;
+
+			var html = '<div id="' + id + '" style="margin:10px;width:300px;height:70px;font-size:12px;padding:0;border:0;">'
+  				+ '<div style="white-space:nowrap;word-wrap:break-word;overflow:hidden;padding:0;border:0;">' + jobName + '</div>'
+				+ '<div style="background-color:#F9CC9D;height:3px;font-size:1px;padding:0;border:0;">'
+					+ '<div id="' + id + '_progressbar" style="background-color:#0f0;width:0;height:3px;padding:0;border:0;"></div>'
+				+ '</div>'
+				+ '<div id="' + id + '_statusbar" style="padding:0;border:0;">&nbsp;</div>'
+				+ '</div>';
+			this._innerPanel.getEl().mask(html);
+
+			if (progress === 100) { // no file submitting
+				var progressBar = document.getComponentById(id + '_progressbar');
+				var statusBar = document.getComponentById(id + '_statusbar');
+				progressBar.style.width = progress + '%';
+				statusBar.innerHTML = i18n.sww_filetrans_nofilesubmitting;
+			}
+		} else { // update progress
+			var progress = params.progress;
+			var error = params.error;
+
+			var progressBar = document.getComponentById(id + '_progressbar');
+			var statusBar = document.getComponentById(id + '_statusbar');
+			if (error) {
+				statusBar.innerHTML = error;
+				progressBar.style.backgroundColor = '#f00';
+				// TODO 文件传输失败，提供后续处理
+			} else {
+				progress = progress < 0 ? 0 : progress;
+				progressBar.style.width = progress + '%';
+				if (progress == 100) {
+					statusBar.innerHTML = i18n.sww_filetrans_submitting;
+				} else {
+					statusBar.innerHTML = i18n.sww_filetransferring + progress + '%';
+				}
+			}
+		}
+
+	};
+
+	this._postHandleContinue = function() {
+		this._innerPanel.getEl().unmask();
+		this.fireEvent('submitted', this);
+	};
+
+	this._postHandleBack = function() {
+		this._innerPanel.getEl().unmask();
+	};
+
+	this._postHandleDetail = function() {
+//		var sccJobCode = Ext.get(this.id + '-postHandle').dom.getAttribute('sccjobcode');
+		var sccJobCode = arguments[arguments.length -1 ];
+		this.tplUtil.rpcProxy('url', 'showJobDetail.action', {jobCode:sccJobCode}, _showJobDetail);
+	};
+
+	this._switchAdvComponentsVisible = function() {
+		var visible = this._advFormPanel.isVisible();
+		this._advFormPanel.setVisible(!visible);
+	};
+
+	this._hasAdvValidError = function() {
+		for (var i=0; i<_validError.length; i++) {
+			if (_validError[i].validator.relatedComponent.isAdvanced())
+				return true;
+		}
+		return false;
+	};
+
+	this._previewCallback = function(success, resp, options) {
+		// judge the window has been closed
+		if (_winClosed) {
+			return;
+		}
+
+		var obj = Ext.util.JSON.decode(resp.responseText);
+		var exception = obj.exception;
+		if (exception) {
+			Ext.Msg.alert(i18n.error, exception);
+			return;
+		}
+
+		var previewStr = obj.runPreview.replace(/\n/g, '<br>');
+		var match = previewStr.match(/<br>/g);
+
+		var mask = '<div id="' + this.id + '-preview" style="border-style:none;cursor:default;width:420px;'
+			// max-height is not supported in IE, so I made this to fix it
+			+ (match != null && match.length > 15 ? 'height:300px;' : '')
+			+ 'overflow-y:auto;">'
+			//+ '<div style="border-style:none;cursor:default;">' + i18n.template_optionaltitle + '</div>'
+			+ '<div style="border-style:none;cursor:default;word-wrap:break-word;">' + previewStr + '</div>'
+			+ '<div style="border-style:none;cursor:default;"><a id="' + this.id + '-closepreview" class="x-btn">' + i18n.ok + '</a></div>'
+			+ '</div>';
+		this._innerPanel.getEl().mask(mask);
+
+		Ext.get(this.id + '-closepreview').addListener('click', function(){this._innerPanel.getEl().unmask();}, this);
+//		Ext.Msg.alert(i18n.run_preview, obj.runPreview.replace(/\n/g, '<br>'));
+	};
+
+	/**
+	 * add by wmlong
+	 * function: just for parameter shorcut to reload the value which saved before
+	 */
+	this._reloadParaValue = function() {
+		if (softwareInfo.type != 'para'
+				|| !softwareInfo.description)
+			return;
+
+		// load parameters
+		Ext.Ajax.request({
+			url : 'paraContentByCode.action',
+			params : {
+				parameterCode:softwareInfo.description
+			},
+			success: function(response, options) {
+				var resp = Ext.util.JSON.decode(response.responseText);
+
+				var exception = resp.exception;
+				if (exception) {
+					Ext.Msg.alert(i18n.shortcut_mention, i18n.shortcut_requestFailure);
+					return;
+				}
+
+				var content = resp.parameterContent.split('|');
+				var entity, id, value, len=content.length;
+		    	var comp;
+		    	var _this = this;
+				for (var i=0; i<len; i++) {
+					try {
+						entity = content[i].split(',');
+						id = entity[0];
+						value = _decodeParam(entity[1]); // decode parameter
+						comp = this.getComponent(id);
+						if (comp) {
+							comp.restorePersistenceData(value);
+						}
+					} catch (ex) {}
+				}
+			},
+			scope : this
+		});
+	};
+
+	this._reloadJobParaValue = function() {
+		if (softwareInfo.type != 'jobPara'
+				|| !softwareInfo.description)
+			return;
+
+		// load parameters
+		Ext.Ajax.request({
+			url : 'jobParaContentByCode.action',
+			params : {
+				jobCode:softwareInfo.description
+			},
+			success: function(response, options) {
+				var resp = Ext.util.JSON.decode(response.responseText);
+
+				var exception = resp.exception;
+				if (exception) {
+					Ext.Msg.alert(i18n.shortcut_mention, i18n.shortcut_requestFailure);
+					return;
+				}
+
+				var content = resp.parameterContent.split('|');
+				var entity, id, value, len=content.length;
+		    	var comp;
+		    	var _this = this;
+				for (var i=1; i<len; i++) {
+					try {
+						entity = content[i].split(',');
+						id = entity[0];
+						value = entity[1];
+						comp = this.getComponent(id);
+						if (comp) {
+							comp.restorePersistenceData(value);
+						}
+					} catch (ex) {}
+				}
+			},
+			scope : this
+		});
+	};
+
+	/* -------------------- Local Functions -------------------- */
+	var _restoreI18N = function(i18ns) {
+		var cfgs = _templateCfg.component || [];
+		var len = cfgs.length;
+		var cfg;
+		for (var i=0; i<len; i++) {
+			cfg = cfgs[i];
+			cfg.labelTxt = i18ns[cfg.label] || '(NoName)';
+//			if (cfg.description)
+//				cfg.description = i18ns[cfg.description] || '';
+		}
+	};
+
+	/*
+	 * components should be sorted with index
+	 * the smaller index one component has, the more top it will be.
+	 * if the component index is undefined, it will be placed behind all the others.
+	 * TODO has not yet implemented that sorted with classification.
+	 */
+	var _sortComponents = function() {
+		var tComponentsCfg = _templateCfg.component || [];
+		tComponentsCfg.sort(function(o1, o2) {
+			// o1 ahead of o2 -, o1==o2 0, else +
+			return o1.index - o2.index;
+		});
+	};
+
+	/*
+	 * (private) replace '|' and ',' of param with $vb (vertical bar) and &cm (comma)
+	 * at the same time, $ is replaced with $dl (dollar)
+	 */
+	var _encodeParam = function(param) {
+		// parameters are usually a string
+		// though they may be other types, such as number
+		// only string would be encoded.
+		if (!param || typeof param != 'string') return param;
+		return param.replace(/\$/g,'$dl').replace(/\,/g,'$cm').replace(/\|/g,'$vb');
+	};
+
+	/*
+	 * (private) decode parameter which has been encoded.
+	 * @see: _encodeParam()
+	 */
+	var _decodeParam = function(param) {
+		if (!param) return param;
+		return param.replace(/\$cm/g,',').replace(/\$vb/g,'|').replace(/\$dl/g,'$');
+	};
+
+	var _showJobDetail = function(success, resp, options) {
+		var obj = Ext.util.JSON.decode(resp.responseText);
+		var exception = obj.exception;
+		if (exception) {
+			Ext.Msg.alert(i18n.error, exception);
+			return;
+		}
+
+		var Record = Ext.data.Record.create({});
+		var record = new Record(obj.jobDetail);
+
+//		Ext.sccportal.JobManager.prototype.createDetailWin(record);
+//		Ext.scc.JobManagerPanel.Util.openJobDetailPanel(record);
+	};
+};
+
+/**
+ * @class Template.TemplateParser
+ * @extends Qmk.util.Observable
+ */
+Ext.extend(Template.TemplateParser, Qmk.util.Observable);
