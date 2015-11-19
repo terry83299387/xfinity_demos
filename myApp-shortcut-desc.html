@@ -150,7 +150,7 @@ img,body,html {
 	var language = "zh_CN";
 </script>
 
-<div id="shortcuttooltip_40281bec4b2acde3014b2ae16c4d0015" class="x-tip" style="position: absolute; z-index: 22000; width: 400px; left: 323px; top: 126px;">
+<div id="shortcuttooltip_40281bec4b2acde3014b2ae16c4d0015" class="x-tip" style="position: absolute; z-index: 22000; width: 400px;display:none;">
 	<div class="x-tip-tl"><div class="x-tip-tr"><div class="x-tip-tc"></div></div></div>
 	<div class="x-tip-bwrap" id="ext-gen1250">
 		<div class="x-tip-ml"><div class="x-tip-mr"><div class="x-tip-mc"><div class="x-tip-body" id="ext-gen1251" style="width: 388px; height: auto;">
@@ -405,5 +405,20 @@ img,body,html {
 	</script>
 	<script type="text/javascript" src="js/myXfinity/myApp/myApp.js"></script>
 	-->
+
+	<script type="text/javascript">
+		$(function() {
+			var sc = $('#shortcuttooltip_40281bec4b2acde3014b2ae16c4d0015');
+			$('#shortcut div a').on('mouseenter', function() {
+				sc.delay(600).show(500);
+			}).on('mouseout', function() {
+				sc.hide(500);
+			}).on('mousemove', function(e) {
+				sc.css('left', (e.clientX + 15) + 'px')
+					.css('top', (e.clientY + 15) + 'px');
+			});
+		});
+	</script>
+	
 </body>
 </html>
