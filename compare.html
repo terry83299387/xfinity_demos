@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>XEService vs Plugin</title>
+<style type="text/css">
+	table, thead, tbody {
+		width: 800px;
+		margin: 50px auto 50px;
+		border: solid 1px #333;
+	}
+	thead, .feature, .yes, .no, .partly, .reqConf {
+		font-weight: bold;
+	}
+	.yes, .no {
+		font-size: 30px;
+	}
+	.reqConf, .partly {
+		font-size: 16px;
+	}
+	.yes {
+		color: green;
+	}
+	.no {
+		color: red;
+	}
+	.reqConf, .partly {
+		color: #D8AF00;
+	}
+</style>
+</head>
+<body style="margin:15px;">
+	<table>
+		<thead>
+			<tr>
+				<td width="200">&nbsp;</td>
+				<td width="300">XEService</td>
+				<td width="300">Plugin</td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td class="feature">IE8</td>
+				<td class="yes">√</td>
+				<td class="yes">√</td>
+			</tr>
+			<tr>
+				<td class="feature">IE9</td>
+				<td class="yes">√</td>
+				<td class="yes">√</td>
+			</tr>
+			<tr>
+				<td class="feature">IE10</td>
+				<td class="yes">√</td>
+				<td class="partly">partly</td>
+			</tr>
+			<tr>
+				<td class="feature">IE11</td>
+				<td class="yes">√</td>
+				<td class="partly">partly</td>
+			</tr>
+			<tr>
+				<td class="feature">Chrome 41-</td>
+				<td class="yes">√</td>
+				<td class="yes">√</td>
+			</tr>
+			<tr>
+				<td class="feature">Chrome 42~44</td>
+				<td class="yes">√</td>
+				<td class="reqConf">Required Additional Config</td>
+			</tr>
+			<tr>
+				<td class="feature">Chrome 45+</td>
+				<td class="yes">√</td>
+				<td class="no">×<span style="font-size:14px;font-weight:800;">* need more efforts</span></td>
+			</tr>
+			<tr>
+				<td class="feature">FireFox</td>
+				<td class="yes">√</td>
+				<td class="yes">√</td>
+			</tr>
+			<tr>
+				<td class="feature">FireFox (future)</td>
+				<td class="yes">√</td>
+				<td class="reqConf">Tend to be Unsupported</td>
+			</tr>
+			<tr>
+				<td class="feature">OS</td>
+				<td class="yes">√</td>
+				<td class="yes">√</td>
+			</tr>
+			<tr>
+				<td class="feature">Java</td>
+				<td class="yes" style="font-size:16px;">Independently</td>
+				<td class="reqConf">Much of Limitation</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
